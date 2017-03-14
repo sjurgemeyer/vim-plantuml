@@ -24,7 +24,7 @@ function! s:tempBuffer()
     return temp_file
 endfunction
 
-function! plantuml#updatePreview(args) abort
+function! plantuml#updatePreview() abort
 
     let tmpfname = tempname()
     let erroutput = tempname()
@@ -35,31 +35,27 @@ function! plantuml#updatePreview(args) abort
 
     call system(cmd)
     if v:shell_error == 0
-        call s:updateBuffer(a:args)
+        call s:updateBuffer(b:plantuml_preview_fname)
     else
-        let lines = readfile(erroutput)
-        let error = ""
-        for line in lines
-            if line =~ ' in file'
-                let line = split(line, ' in file')[0] . ", "
-            endif
-            let error = error . line
-        endfor
-
-        echoerr error
+        echoerr s:getErrorFromFile(erroutput)
     endif
 endfunction
 
-function! s:updateBuffer(args) abort
-    call s:insertDiagram(b:plantuml_preview_fname)
-    call s:addTitle()
+function s:getErrorFromFile(filename)
+    let lines = readfile(a:filename)
+    let error = ""
+    for line in lines
+        if line =~ ' in file'
+            let line = split(line, ' in file')[0] . ", "
+        endif
+        let error = error . line
+    endfor
+    return error
 endfunction
 
-function! s:insertDiagram(fname) abort
-
+function! s:updateBuffer(plantuml_preview_fname) abort
     let temp_file = s:tempBuffer()
-    call s:readWithoutStoringAsAltFile(a:fname)
-
+    call s:readWithoutStoringAsAltFile(a:plantuml_preview_fname)
     wincmd p " change back to the source buffer
 endfunction
 
@@ -90,17 +86,4 @@ function! s:convertNonAsciiSupportedSyntax(fname) abort
 
     exec oldbuf . "buffer"
     exec tmpbufnr. "bwipe!"
-endfunction
-
-function! s:addTitle() abort
-    let lnum = search('^title ', 'n')
-    if !lnum
-        return
-    endif
-
-    let title = substitute(getline(lnum), '^title \(.*\)', '\1', '')
-
-    call append(0, "")
-    call append(0, repeat("^", len(title)+6))
-    call append(0, "   " . title)
 endfunction

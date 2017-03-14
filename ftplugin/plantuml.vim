@@ -3,4 +3,4 @@ if exists("b:loaded_plantuml")
 endif
 let b:loaded_plantuml=1
 
-autocmd bufwritepost *.uml silent call plantuml#updatePreview({'write': 1})
+autocmd bufwritepost *.uml silent call plantuml#updatePreview()
