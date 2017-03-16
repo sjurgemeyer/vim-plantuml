@@ -3,6 +3,9 @@ if exists("g:plantuml_jar_path")
 else
     let s:jar_path = expand("<sfile>:p:h") . "/../plantuml.jar"
 endif
+if !exists('g:plantuml_preview_height')
+	let g:plantuml_preview_height = 40
+endif
 
 function! s:tempBuffer()
     let temp_file = tempname()
@@ -18,8 +21,7 @@ function! s:tempBuffer()
     setlocal noswapfile
     setlocal nowrap
     setlocal bufhidden=delete
-    setlocal winheight=40
-
+	exe "resize " . g:plantuml_preview_height
     setlocal filetype=plantumlpreview
     return temp_file
 endfunction
